@@ -13,7 +13,20 @@ The system SHALL provide canonical skill template files that the `avw-cli` packa
 
 #### Scenario: avw-full template exists
 - **WHEN** the schema bundle is complete
-- **THEN** a `templates/skills/avw-full.md` file exists containing: end-to-end orchestration (prerequisites → new → ff → apply with Entire guidance → demo → verify → archive) with user confirmation at each stage
+- **THEN** a `templates/skills/avw-full.md` file exists containing: end-to-end orchestration (prerequisites → new → ff → apply with Entire guidance → demo + compound → verify → archive with solutions promotion) with user confirmation at each stage
+
+### Requirement: avw-full includes compound step
+The `avw-full` skill template SHALL include the compound knowledge extraction step between verify and archive.
+
+#### Scenario: Compound step in full workflow
+- **WHEN** an agent executes the avw:full workflow
+- **THEN** after demo creation, the agent creates the compound artifact
+- **THEN** the compound artifact must be complete before proceeding to verify
+
+#### Scenario: Archive includes solutions promotion
+- **WHEN** an agent executes the archive step in avw:full
+- **THEN** compound.md is copied to `openspec/solutions/<spec_ref>/<date>-<slug>.md`
+- **THEN** delta specs are merged to `openspec/specs/` as usual
 
 ### Requirement: Templates use variable placeholders
 Skill templates SHALL use `{{variable}}` placeholders for tool-specific values.

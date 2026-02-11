@@ -1,0 +1,185 @@
+name: verified
+version: 1
+description: Verified workflow with visual proof and knowledge capture — proposal → specs + design → tasks → demo + compound
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: Initial proposal with required Prior Art section referencing openspec/solutions/
+    template: proposal.md
+    instruction: |
+      Create the proposal document that establishes WHY this change is needed.
+
+      Sections:
+      - **Why**: 1-2 sentences on the problem or opportunity. What problem does this solve? Why now?
+      - **What Changes**: Bullet list of changes. Be specific about new capabilities, modifications, or removals. Mark breaking changes with **BREAKING**.
+      - **Capabilities**: Identify which specs will be created or modified:
+        - **New Capabilities**: List capabilities being introduced. Each becomes a new `specs/<name>/spec.md`. Use kebab-case names.
+        - **Modified Capabilities**: List existing capabilities whose REQUIREMENTS are changing. Only include if spec-level behavior changes. Check `openspec/specs/` for existing spec names. Leave empty if no requirement changes.
+      - **Prior Art**: REQUIRED. Search `openspec/solutions/<capability>/` for each capability in scope.
+        List relevant solutions with links, or state "No relevant solutions found."
+        For each solution, check if the referenced spec has been modified since the solution date.
+        Mark stale solutions with [STALE].
+        Run: `ls openspec/solutions/<capability>/` for each capability in scope.
+      - **Impact**: Affected code, APIs, dependencies, or systems.
+
+      IMPORTANT: The Capabilities section is critical. It creates the contract between
+      proposal and specs phases. Research existing specs before filling this in.
+
+      IMPORTANT: The Prior Art section is required. You MUST search openspec/solutions/
+      for each capability listed. This ensures past knowledge is referenced before new work begins.
+
+      Keep it concise (1-2 pages). Focus on the "why" not the "how" —
+      implementation details belong in design.md.
+    requires: []
+
+  - id: specs
+    generates: "specs/**/*.md"
+    description: Detailed specifications for the change
+    template: spec.md
+    instruction: |
+      Create specification files that define WHAT the system should do.
+
+      Create one spec file per capability listed in the proposal's Capabilities section.
+      - New capabilities: use the exact kebab-case name from the proposal (specs/<capability>/spec.md).
+      - Modified capabilities: use the existing spec folder name from openspec/specs/<capability>/ when creating the delta spec at specs/<capability>/spec.md.
+
+      Delta operations (use ## headers):
+      - **ADDED Requirements**: New capabilities
+      - **MODIFIED Requirements**: Changed behavior — MUST include full updated content
+      - **REMOVED Requirements**: Deprecated features — MUST include **Reason** and **Migration**
+      - **RENAMED Requirements**: Name changes only — use FROM:/TO: format
+
+      Format requirements:
+      - Each requirement: `### Requirement: <name>` followed by description
+      - Use SHALL/MUST for normative requirements (avoid should/may)
+      - Each scenario: `#### Scenario: <name>` with WHEN/THEN format
+      - **CRITICAL**: Scenarios MUST use exactly 4 hashtags (`####`). Using 3 hashtags or bullets will fail silently.
+      - Every requirement MUST have at least one scenario.
+
+      Specs should be testable — each scenario is a potential test case.
+    requires:
+      - proposal
+
+  - id: design
+    generates: design.md
+    description: Technical design document with implementation details
+    template: design.md
+    instruction: |
+      Create the design document that explains HOW to implement the change.
+
+      When to include design.md (create only if any apply):
+      - Cross-cutting change (multiple services/modules) or new architectural pattern
+      - New external dependency or significant data model changes
+      - Security, performance, or migration complexity
+      - Ambiguity that benefits from technical decisions before coding
+
+      Sections:
+      - **Context**: Background, current state, constraints, stakeholders
+      - **Goals / Non-Goals**: What this design achieves and explicitly excludes
+      - **Decisions**: Key technical choices with rationale (why X over Y?). Include alternatives considered.
+      - **Risks / Trade-offs**: Known risks and trade-offs. Format: [Risk] → Mitigation
+
+      Focus on architecture and approach, not line-by-line implementation.
+      Reference the proposal for motivation and specs for requirements.
+    requires:
+      - proposal
+
+  - id: tasks
+    generates: tasks.md
+    description: Implementation checklist with trackable tasks
+    template: tasks.md
+    instruction: |
+      Create the task list that breaks down the implementation work.
+
+      **IMPORTANT: Follow the template below exactly.** The apply phase parses
+      checkbox format to track progress. Tasks not using `- [ ]` won't be tracked.
+
+      Guidelines:
+      - Group related tasks under ## numbered headings
+      - Each task MUST be a checkbox: `- [ ] X.Y Task description`
+      - Tasks should be small enough to complete in one session
+      - Order tasks by dependency (what must be done first?)
+
+      Reference specs for what needs to be built, design for how to build it.
+      Each task should be verifiable — you know when it's done.
+    requires:
+      - specs
+      - design
+
+  - id: demo
+    generates: demo.md
+    description: Visual proof-of-work via Showboat + Rodney — agents construct executable verification, not editable markdown
+    template: demo.md
+    instruction: |
+      Construct the demo artifact using ONLY Showboat CLI and Rodney commands.
+      You MUST NOT edit demo.md directly — all content is generated via CLI.
+
+      Prerequisites:
+      - ALL tasks in tasks.md must be checked (`- [x]`). If any are unchecked, stop and run `/opsx:apply` first.
+      - Showboat and Rodney must be installed and available.
+
+      Construction flow:
+      1. `showboat init <change-dir>/demo.md "<change-name> Verification"` — creates the file
+      2. For each feature to verify:
+         a. `showboat note <change-dir>/demo.md "Verifying: <description>"` — explain what's being tested
+         b. `showboat exec <change-dir>/demo.md bash '<command>'` — run verification command
+         c. For browser features: `rodney start`, `rodney open <url>`, `showboat image <change-dir>/demo.md 'rodney screenshot /tmp/<name>.png && echo /tmp/<name>.png'`, `rodney stop`
+      3. For accessibility verification: `showboat exec <change-dir>/demo.md bash 'rodney ax-tree --depth 3'`
+      4. Capture Entire attribution: `showboat exec <change-dir>/demo.md bash 'git log --format="%(trailers:key=Entire-Attribution)" -5'`
+      5. `showboat verify <change-dir>/demo.md` — re-runs all blocks, confirms reproducibility
+
+      Entire operational guidance:
+      - Use `entire status` to check session state before starting
+      - Use `entire rewind` if you need to recover from a bad state
+      - Use `entire explain` to understand what happened in the session
+    requires:
+      - tasks
+
+  - id: compound
+    generates: compound.md
+    description: Curated knowledge extraction — captures what was learned for openspec/solutions/
+    template: compound.md
+    instruction: |
+      Create the compound artifact that captures knowledge gained during implementation.
+      This artifact is REQUIRED — changes cannot be archived without it.
+
+      Before creating:
+      1. Check `openspec/solutions/<spec_ref>/` for existing entries related to this work
+      2. If a related solution exists and this knowledge supersedes it:
+         - Copy the existing solution into the change directory
+         - Update it with new knowledge
+         - On archive, the updated version overwrites the original
+      3. If the knowledge is distinct, create a new compound.md entry
+
+      Required YAML frontmatter:
+      - `spec_ref`: capability name matching `openspec/specs/<name>/` — links knowledge to spec
+      - `date`: ISO 8601 YYYY-MM-DD
+      - `problem_type`: one of build_error, runtime_error, workflow_issue, best_practice, performance_issue, security_issue, integration_issue, logic_error
+      - `severity`: one of critical, high, medium, low
+      - `tags` (optional): array of lowercase, hyphen-separated keywords
+
+      Required sections:
+      - **Problem**: What was encountered during implementation
+      - **What Didn't Work**: Approaches tried and why they failed — capture dead ends
+      - **Solution**: What worked, with before/after code examples
+      - **Why This Works**: Root cause understanding
+      - **Prevention**: How to avoid this problem in future
+
+      On archive, this file is promoted to `openspec/solutions/<spec_ref>/<date>-<slug>.md`
+      where slug is derived from the H1 title, kebab-cased.
+    requires:
+      - tasks
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Read context files, work through pending tasks, mark complete as you go.
+    Pause if you hit blockers or need clarification.
+
+    Entire operational guidance:
+    - Run `entire status` at the start of each session to check state
+    - Use `entire rewind` if you need to recover from a bad state during implementation
+    - Use `entire resume` to continue from where you left off
+    - Use `entire explain` to understand what happened in a previous session
