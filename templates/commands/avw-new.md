@@ -1,5 +1,5 @@
 ---
-description: Start a new verified change with prerequisite validation
+description: Start a new AVW change with prerequisite validation
 ---
 
 Read the skill template at `templates/skills/avw-new.md` and execute its steps.

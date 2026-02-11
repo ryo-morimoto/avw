@@ -1,17 +1,17 @@
 ## Why
 
-The `verified` schema (see change: `build-agent-verification-workflow`) defines a workflow combining OpenSpec + Entire + Showboat/Rodney. But adopting it in a project requires manual steps: copy schema files, generate skills for each coding tool, validate 5 system dependencies, enable Entire. This friction prevents adoption. An npm CLI package makes setup a single command: `npx avw init`.
+The `avw` schema (see change: `build-agent-verification-workflow`) defines a workflow combining OpenSpec + Entire + Showboat/Rodney. But adopting it in a project requires manual steps: copy schema files, generate skills for each coding tool, validate 5 system dependencies, enable Entire. This friction prevents adoption. An npm CLI package makes setup a single command: `npx avw init`.
 
 ## What Changes
 
 - Create an npm package (`@opsx-compound/avw` or similar) at `packages/avw-cli/`
-- `avw init`: validate dependencies (openspec, entire, showboat, rodney, Chrome) → check openspec initialized → copy verified schema → detect coding tools (.claude, .codex, .opencode) → generate skills → enable Entire → print summary
+- `avw init`: validate dependencies (openspec, entire, showboat, rodney, Chrome) → check openspec initialized → copy avw schema → detect coding tools (.claude, .codex, .opencode) → generate skills → enable Entire → print summary
 - `avw update`: re-generate skills + update schema from latest package version, skip Entire config
 - Schema and skill templates are bundled as static assets in the npm package
 
-### Dependency on `verified-schema` change
+### Dependency on `avw-schema` change
 
-This change depends on the `verified-schema` schema definition and templates being finalized first. The CLI bundles and distributes those files.
+This change depends on the `avw-schema` schema definition and templates being finalized first. The CLI bundles and distributes those files.
 
 ### CLI design questions to resolve in design.md
 
@@ -49,8 +49,8 @@ Checking dependencies...
   ✓ rodney 0.3.0
   ✓ Chrome detected
 
-Installing verified schema...
-  → openspec/schemas/verified/ (6 artifacts)
+Installing avw schema...
+  → openspec/schemas/avw/ (6 artifacts)
 
 Detecting coding tools...
   ✓ Claude Code (.claude/)
@@ -65,7 +65,7 @@ Generating skills...
 
 Entire: already enabled
 
-Done! Start a verified change with /avw:new
+Done! Start an avw change with /avw:new
 ```
 
 ### Expected failure output

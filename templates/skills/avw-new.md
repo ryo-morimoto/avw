@@ -1,4 +1,4 @@
-Start a new verified change with prerequisite validation.
+Start a new AVW change with prerequisite validation.
 
 **Steps**
 
@@ -21,7 +21,7 @@ Start a new verified change with prerequisite validation.
 3. **Create the change**
 
    ```bash
-   {{openspec_cmd}} new change "<name>" --schema verified
+   {{openspec_cmd}} new change "<name>" --schema avw
    ```
 
    Use the name provided by the user. If no name was given, ask for one.

@@ -1,10 +1,10 @@
 ## ADDED Requirements
 
 ### Requirement: Compound artifact is a required DAG node
-The compound artifact SHALL be a required artifact in the `verified` schema DAG. Changes MUST NOT be archived without a completed compound artifact.
+The compound artifact SHALL be a required artifact in the `avw` schema DAG. Changes MUST NOT be archived without a completed compound artifact.
 
 #### Scenario: Archive blocked without compound
-- **WHEN** an agent attempts to archive a verified-schema change
+- **WHEN** an agent attempts to archive an avw-schema change
 - **THEN** `openspec status --change "<name>"` shows compound as incomplete
 - **THEN** archive cannot proceed until compound.md exists
 

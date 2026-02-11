@@ -1,6 +1,6 @@
-name: verified
+name: avw
 version: 1
-description: Verified workflow with visual proof and knowledge capture — proposal → specs + design → tasks → demo + compound
+description: AVW (Agent Verification Workflow) — visual proof and knowledge capture — proposal → specs + design → tasks → demo + compound
 
 artifacts:
   - id: proposal

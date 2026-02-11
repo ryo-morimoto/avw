@@ -1,4 +1,4 @@
-End-to-end verified change workflow: prerequisites through archive with solutions promotion.
+End-to-end AVW change workflow: prerequisites through archive with solutions promotion.
 
 Each stage requires user confirmation before proceeding. The user can stop at any stage and resume later.
 
@@ -23,7 +23,7 @@ Stop and report missing tools. Do not proceed without all dependencies.
 ### Stage 2: Create Change
 
 ```bash
-{{openspec_cmd}} new change "<name>" --schema verified
+{{openspec_cmd}} new change "<name>" --schema avw
 ```
 
 Display status showing the 6-artifact DAG.

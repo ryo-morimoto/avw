@@ -1,4 +1,4 @@
-Construct the demo artifact for a verified change using Showboat + Rodney.
+Construct the demo artifact for an AVW change using Showboat + Rodney.
 
 **Prerequisites**: All tasks in tasks.md must be checked (`- [x]`). If any are unchecked, list incomplete tasks and direct the user to run `/opsx:apply` first.
 

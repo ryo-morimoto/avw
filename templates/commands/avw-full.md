@@ -1,5 +1,5 @@
 ---
-description: End-to-end verified change workflow with visual proof and knowledge capture
+description: End-to-end AVW change workflow with visual proof and knowledge capture
 ---
 
 Read the skill template at `templates/skills/avw-full.md` and execute its stages.

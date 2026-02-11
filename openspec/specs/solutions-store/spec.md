@@ -8,7 +8,7 @@ The system SHALL maintain a knowledge base at `openspec/solutions/` organized by
 - **THEN** `openspec/solutions/auth/` is the corresponding knowledge directory
 
 #### Scenario: Solutions directory created on init
-- **WHEN** `avw init` runs (or the verified schema is first used)
+- **WHEN** `avw init` runs (or the avw schema is first used)
 - **THEN** `openspec/solutions/` directory exists
 
 ### Requirement: Solution file format
@@ -35,7 +35,7 @@ Solution freshness SHALL be determined by comparing solution date against spec m
 - **THEN** agents referencing this solution in Prior Art sections SHALL mark it `[STALE]`
 
 ### Requirement: Solutions are referenced during proposal creation
-The verified schema's proposal template SHALL direct agents to search solutions before writing a proposal.
+The avw schema's proposal template SHALL direct agents to search solutions before writing a proposal.
 
 #### Scenario: Solutions exist for target capability
 - **WHEN** an agent creates a proposal for a change targeting capability `auth`

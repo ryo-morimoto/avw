@@ -5,7 +5,7 @@ The system SHALL provide canonical skill template files that the `avw-cli` packa
 
 #### Scenario: avw-new template exists
 - **WHEN** the schema bundle is complete
-- **THEN** a `templates/skills/avw-new.md` file exists containing: prerequisite validation commands, `openspec new change --schema verified`, and status display instructions
+- **THEN** a `templates/skills/avw-new.md` file exists containing: prerequisite validation commands, `openspec new change --schema avw`, and status display instructions
 
 #### Scenario: avw-demo template exists
 - **WHEN** the schema bundle is complete
