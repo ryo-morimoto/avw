@@ -51,7 +51,7 @@ Use `bun build` to bundle TypeScript to a single ESM file targeting Node.js. Bun
 bun build src/cli.ts --outdir dist --target node --format esm --minify
 ```
 
-A `build.ts` script handles the shebang injection and asset copying:
+A `build.ts` script configures the bundler:
 
 ```ts
 await Bun.build({
@@ -60,10 +60,12 @@ await Bun.build({
   target: "node",
   format: "esm",
   minify: true,
+  loader: { ".md": "text" },
+  banner: "#!/usr/bin/env node",
 });
 ```
 
-The `package.json` `bin` field points to `dist/cli.js`. A prebuild script copies schema and template assets into `assets/`.
+Bun natively inlines `.yaml` imports as JS objects and `.md` imports as strings (via the `text` loader). Schema and template files are embedded directly in the single `dist/cli.js` output — no separate `assets/` directory or copy step needed. The `package.json` `bin` field points to `dist/cli.js`.
 
 **Alternative considered:** `tsup` — adds a dev dependency for functionality Bun provides natively. `tsc` — requires shipping multiple files and a separate shebang step.
 
@@ -84,10 +86,20 @@ Skill templates use `{{schemaName}}` style placeholders. Replace with `String.pr
 
 **Alternative considered:** `mustache`, `handlebars` — overkill for simple variable interpolation.
 
-### Bundled assets: copy from source tree at build time
-The schema files (`openspec/schemas/avw/`) and templates (`templates/`) are copied into `packages/avw-cli/assets/` during the build step via a prebuild script. At runtime, the CLI resolves assets relative to `import.meta.url`.
+### Bundled assets: inlined at build time via Bun loader
+Bun's bundler natively handles non-JS imports:
+- `.yaml` files → parsed and inlined as JavaScript objects
+- `.md` files → inlined as strings via `loader: { ".md": "text" }`
 
-This avoids git submodules or fetching assets at install time.
+Source files import assets directly from the repo:
+
+```ts
+// src/core/schema.ts
+import schemaYaml from "../../../openspec/schemas/avw/schema.yaml";
+import proposalTpl from "../../../openspec/schemas/avw/templates/proposal.md";
+```
+
+At build time, these are embedded in the single `dist/cli.js` output. No `assets/` directory, no copy script, no runtime path resolution needed. The CLI ships as one self-contained file.
 
 ### Entire enablement: `entire enable` CLI call
 Run `execSync('entire enable')` and check the exit code. If it succeeds or if `entire status` reports already enabled, proceed. The CLI does not configure Entire beyond enabling it.
@@ -106,16 +118,12 @@ packages/avw-cli/
 │   │   └── update.ts       # update workflow orchestration
 │   ├── core/
 │   │   ├── validation.ts   # Node/deps/OpenSpec checks (unified)
-│   │   ├── schema.ts       # Schema installation
-│   │   ├── skills.ts       # Tool detection + skill generation (unified)
+│   │   ├── schema.ts       # Schema installation (imports schema yaml/md directly)
+│   │   ├── skills.ts       # Tool detection + skill generation (imports templates directly)
 │   │   └── entire.ts       # Entire integration
 │   └── util/
 │       ├── exec.ts         # execSync wrapper with error handling
-│       ├── log.ts          # Colored output helpers (✓/✗ prefixes)
-│       └── paths.ts        # Asset path resolution via import.meta.url
-└── assets/                 # Populated at build time
-    ├── schema/             # Copy of openspec/schemas/avw/
-    └── templates/          # Copy of templates/
+│       └── log.ts          # Colored output helpers (✓/✗ prefixes)
 ```
 
 Domain-centered grouping under `core/` keeps related logic together:
@@ -130,7 +138,7 @@ Domain-centered grouping under `core/` keeps related logic together:
 1. `validation.checkNode()` — verify Node.js >= 20, exit if not
 2. `validation.checkDeps()` — validate all 5 dependencies, collect results, exit if any missing
 3. `validation.checkOpenSpec()` — verify `openspec/` directory exists in cwd
-4. `schema.install()` — copy `assets/schema/` to `openspec/schemas/avw/`
+4. `schema.install()` — write embedded schema files to `openspec/schemas/avw/`
 5. `skills.detect()` — scan for `.claude/`, `.codex/`, `.opencode/`
 6. `skills.generate()` — for each detected tool, render and write skill files
 7. `entire.enable()` — run `entire enable` if not already enabled
