@@ -1,0 +1,22 @@
+{
+  "name": "avw",
+  "version": "0.1.0",
+  "description": "CLI for setting up the AVW (Agent Verification Workflow) schema in any project",
+  "type": "module",
+  "bin": {
+    "avw": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "bun run build.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "picocolors": "^1.1.0"
+  }
+}

@@ -31,10 +31,13 @@ Use Node.js built-in `util.parseArgs` (stable since Node 20, also available in B
 ```ts
 import { parseArgs } from "node:util";
 
-const { positionals } = parseArgs({
+const { positionals, values } = parseArgs({
   args: process.argv.slice(2),
   allowPositionals: true,
-  strict: true,
+  strict: false,
+  options: {
+    help: { type: "boolean", short: "h" },
+  },
 });
 
 const command = positionals[0]; // "init" | "update"
