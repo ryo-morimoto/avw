@@ -7,8 +7,8 @@ Currently, adopting AVW in a new project requires manually copying schema files,
 ## Goals / Non-Goals
 
 **Goals:**
-- Single-command AVW setup via `npx avw-cli init`
-- Schema + skill refresh via `avw-cli update`
+- Single-command AVW setup via `npx avw init`
+- Schema + skill refresh via `avw update`
 - Clear dependency validation with actionable install instructions on failure
 - Zero runtime dependencies beyond Node.js built-ins where possible
 
@@ -20,10 +20,10 @@ Currently, adopting AVW in a new project requires manually copying schema files,
 
 ## Decisions
 
-### Package name: `avw-cli`
-Publish as `avw-cli` (unscoped). Descriptive, avoids namespace conflicts, and makes the purpose clear from the package name alone.
+### Package name: `avw`
+Publish as `avw` (unscoped). Short, matches the binary name, and enables the clean `npx avw init` invocation. If `avw` is unavailable on npm, fall back to `avw-cli`.
 
-**Alternative considered:** `avw` — too generic, risk of npm name collision. `@opsx-compound/avw` — adds org coupling, longer `npx` invocation.
+**Alternative considered:** `@opsx-compound/avw` — adds org coupling, longer `npx` invocation.
 
 ### Argument parsing: `util.parseArgs`
 Use Node.js built-in `util.parseArgs` (stable since Node 20, also available in Bun). It handles positional arguments and flags with zero dependencies and a clean API:
@@ -126,7 +126,7 @@ Domain-centered grouping under `core/` keeps related logic together:
 
 ### Execution flow
 
-**`avw-cli init`:**
+**`avw init`:**
 1. `validation.checkNode()` — verify Node.js >= 20, exit if not
 2. `validation.checkDeps()` — validate all 5 dependencies, collect results, exit if any missing
 3. `validation.checkOpenSpec()` — verify `openspec/` directory exists in cwd
@@ -136,7 +136,7 @@ Domain-centered grouping under `core/` keeps related logic together:
 7. `entire.enable()` — run `entire enable` if not already enabled
 8. Print summary
 
-**`avw-cli update`:**
+**`avw update`:**
 1. `schema.install()` — overwrite schema files
 2. `skills.detect()` — scan for tool directories
 3. `skills.generate()` — regenerate skill files
@@ -148,9 +148,9 @@ Node 20 is the current LTS (active support). It provides `util.parseArgs`, `Stri
 ## Risks / Trade-offs
 
 **[Risk] Bundled schema diverges from source** — The npm package bundles a snapshot of the schema at publish time. If the schema is updated in the repo but the package isn't republished, users get stale files.
-→ Mitigation: The `avw-cli update` command exists specifically for this. Document that schema updates require a new package version. CI can enforce that schema changes trigger a package version bump.
+→ Mitigation: The `avw update` command exists specifically for this. Document that schema updates require a new package version. CI can enforce that schema changes trigger a package version bump.
 
-**[Risk] Entire CLI interface changes** — The CLI calls `entire enable` and `entire status` directly. If Entire changes its CLI interface, the avw-cli breaks.
+**[Risk] Entire CLI interface changes** — The CLI calls `entire enable` and `entire status` directly. If Entire changes its CLI interface, the avw CLI breaks.
 → Mitigation: Wrap Entire calls in a single `entire.ts` module. Pin to known Entire CLI behavior and update when needed.
 
 **[Risk] Chrome detection is fragile** — Chromium-based browsers install to different paths across OS and distro.
